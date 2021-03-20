@@ -18,8 +18,8 @@ import (
 )
 
 type Response struct {
-	Message string `json:"login"`
-	Code    string `json:"url"`
+	Message string `json:"message"`
+	Code    string `json:"code"`
 }
 
 func main() {

@@ -1,0 +1,9 @@
+.git
+.editorconfig
+.gitignore
+*.zip
+*.md
+
+# build files
+audio-saver
+main

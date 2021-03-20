@@ -1,0 +1,12 @@
+version: '3.8'
+
+services:
+  audio-saver:
+    container_name: audio-saver
+    build:
+      context: ./
+      target: builder
+    working_dir: /build
+    ports:
+      - "8000:300"
+    command: ./main
