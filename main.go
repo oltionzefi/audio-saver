@@ -70,13 +70,13 @@ func main() {
 	})
 
 	m.Post("/upload/:identifier", func(enc encoder.Encoder, params martini.Params, res http.ResponseWriter, req *http.Request) (int, []byte) {
-		code := UploadSound(req, params)
-		if code != "200" {
-			result := Response{"Error happened during save!", code}
+		status := upload(req, params)
+		if status != "200" {
+			result := Response{"Error happened during save!", status}
 			return http.StatusServiceUnavailable, encoder.Must(enc.Encode(result))
 		}
 
-		result := Response{"Saved!", code}
+		result := Response{"Saved!", status}
 		return http.StatusOK, encoder.Must(enc.Encode(result))
 	})
 
@@ -101,7 +101,7 @@ func main() {
 	listener.Close()
 }
 
-func UploadSound(r *http.Request, params martini.Params) string {
+func upload(r *http.Request, params martini.Params) string {
 	r.ParseMultipartForm(10 << 20)
 	file, handler, err := r.FormFile("file")
 	if err != nil {
