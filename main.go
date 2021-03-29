@@ -2,7 +2,7 @@ package main
 
 import (
 	"fmt"
-	"io"
+	"io/ioutil"
 	"log"
 	"net"
 	"net/http"
@@ -69,7 +69,7 @@ func main() {
 		return http.StatusOK, encoder.Must(enc.Encode(result))
 	})
 
-	m.Post("/save/:file", func(enc encoder.Encoder, params martini.Params, res http.ResponseWriter, req *http.Request) (int, []byte) {
+	m.Post("/upload/:identifier", func(enc encoder.Encoder, params martini.Params, res http.ResponseWriter, req *http.Request) (int, []byte) {
 		code := UploadSound(req, params)
 		if code != "200" {
 			result := Response{"Error happened during save!", code}
@@ -102,27 +102,37 @@ func main() {
 }
 
 func UploadSound(r *http.Request, params martini.Params) string {
-	file, _, err := r.FormFile("audio")
-
+	r.ParseMultipartForm(10 << 20)
+	file, handler, err := r.FormFile("file")
 	if err != nil {
+		fmt.Println("Error Retrieving the File")
+		fmt.Println(err)
 		return "500"
 	}
-
 	defer file.Close()
 
-	filename := fmt.Sprintf("upload/%s.wav", params["file"])
-	out, err := os.Create(filename)
+	fmt.Printf("Uploaded File: %+v\n", handler.Filename)
+	fmt.Printf("File Size: %+v\n", handler.Size)
+	fmt.Printf("MIME Header: %+v\n", handler.Header)
 
+	// a particular naming pattern
+	filename := fmt.Sprintf("upload-%s-*.wav", params["identifier"])
+	tempFile, err := ioutil.TempFile("temp-videos", filename)
 	if err != nil {
+		fmt.Println(err)
 		return "500"
 	}
+	defer tempFile.Close()
 
-	defer out.Close()
-
-	_, err = io.Copy(out, file)
+	// read all of the contents of our uploaded file into a
+	// byte array
+	fileBytes, err := ioutil.ReadAll(file)
 	if err != nil {
+		fmt.Println(err)
 		return "500"
 	}
+	// write this byte array to our temporary file
+	tempFile.Write(fileBytes)
 
 	return "200"
 }

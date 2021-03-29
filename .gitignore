@@ -1,2 +1,5 @@
 audio-saver
 main
+*.wav
+
+.DS_Store
